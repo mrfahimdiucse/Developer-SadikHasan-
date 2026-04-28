@@ -1,43 +1,33 @@
 import { getEmailConfigErrorMessage, sendContactEmail } from "../lib/contact-email";
 
-function parseRequestBody(body: unknown) {
-  if (!body) {
-    return {};
-  }
+export const runtime = "nodejs";
 
-  if (typeof body === "string") {
-    try {
-      return JSON.parse(body);
-    } catch {
-      return {};
-    }
-  }
+export async function POST(request: Request) {
+  let body: Record<string, unknown> = {};
 
-  if (typeof body === "object") {
-    return body as Record<string, unknown>;
-  }
-
-  return {};
-}
-
-export default async function handler(req: any, res: any) {
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({
-      success: false,
-      message: "Method not allowed",
-    });
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json(
+      {
+        success: false,
+        message: "Invalid JSON body.",
+      },
+      { status: 400 },
+    );
   }
 
   const configError = getEmailConfigErrorMessage();
   if (configError) {
-    return res.status(500).json({
-      success: false,
-      message: configError,
-    });
+    return Response.json(
+      {
+        success: false,
+        message: configError,
+      },
+      { status: 500 },
+    );
   }
 
-  const body = parseRequestBody(req.body);
   const name = typeof body.name === "string" ? body.name.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
   const subject = typeof body.subject === "string" ? body.subject.trim() : "";
@@ -46,10 +36,13 @@ export default async function handler(req: any, res: any) {
   const service = typeof body.service === "string" ? body.service.trim() : "";
 
   if (!name || !email || !message) {
-    return res.status(400).json({
-      success: false,
-      message: "Name, email, and message are required.",
-    });
+    return Response.json(
+      {
+        success: false,
+        message: "Name, email, and message are required.",
+      },
+      { status: 400 },
+    );
   }
 
   try {
@@ -62,15 +55,21 @@ export default async function handler(req: any, res: any) {
       service,
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Email sent successfully",
-    });
+    return Response.json(
+      {
+        success: true,
+        message: "Email sent successfully",
+      },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Vercel email API error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to send email",
-    });
+    return Response.json(
+      {
+        success: false,
+        message: error instanceof Error ? error.message : "Failed to send email",
+      },
+      { status: 500 },
+    );
   }
 }

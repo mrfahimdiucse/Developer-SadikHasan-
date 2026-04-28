@@ -47,12 +47,23 @@ export default function Contact() {
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
-      if (result.success) {
+      const rawResponse = await response.text();
+      let result: { success?: boolean; message?: string } = {};
+
+      try {
+        result = rawResponse ? JSON.parse(rawResponse) : {};
+      } catch {
+        result = {
+          success: false,
+          message: response.ok ? 'Unexpected server response.' : 'Server returned a non-JSON error response.',
+        };
+      }
+
+      if (response.ok && result.success) {
         setStatus({ type: 'success', message: 'Message sent successfully!' });
         (e.target as HTMLFormElement).reset();
       } else {
-        setStatus({ type: 'error', message: 'Failed to send message. Please try again.' });
+        setStatus({ type: 'error', message: result.message || 'Failed to send message. Please try again.' });
       }
     } catch (error) {
       console.error('Submission error:', error);
@@ -222,3 +233,4 @@ export default function Contact() {
     </div>
   );
 }
+
