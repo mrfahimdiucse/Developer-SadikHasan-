@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  
+  --color-brand: #ff2d55;
+  --color-brand-hover: #e6234b;
+  --color-bg-dark: #0a0a0a;
+  --color-bg-card: #141414;
+  --color-bg-card-hover: #1c1c1c;
+
+  --animate-float: float 6s ease-in-out infinite;
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+}
+
+@utility container-custom {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+body {
+  background-color: var(--color-bg-dark);
+  color: #ffffff;
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+.pink-gradient-text {
+  background: linear-gradient(135deg, #ff2d55 0%, #ff5e7d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-outline {
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.1);
+  color: transparent;
+}
+
+.text-outline-white {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+  color: transparent;
+}
+
+.text-outline-strong {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15);
+  color: transparent;
+}
+
+.bg-pattern {
+  background-image: 
+    linear-gradient(rgba(255, 45, 85, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 45, 85, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  background-color: var(--color-bg-card-hover);
+  transform: translateY(-5px);
+  border-color: var(--color-brand);
+}

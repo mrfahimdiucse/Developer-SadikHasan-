@@ -1,0 +1,9 @@
+{
+  "name": "Sadik Hasan Portfolio",
+  "description": "Professional personal portfolio for Sadik Hasan, featuring a high-end dark aesthetic.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}
