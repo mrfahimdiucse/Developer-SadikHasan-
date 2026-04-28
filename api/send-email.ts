@@ -1,5 +1,3 @@
-import { getEmailConfigErrorMessage, sendContactEmail } from "../lib/contact-email";
-
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -9,11 +7,13 @@ export default async function handler(req: any, res: any) {
     });
   }
 
-  const configError = getEmailConfigErrorMessage();
-  if (configError) {
+  const gmailUser = process.env.GMAIL_USER?.trim();
+  const gmailAppPass = process.env.GMAIL_APP_PASS?.replace(/\s+/g, "");
+
+  if (!gmailUser || !gmailAppPass) {
     return res.status(500).json({
       success: false,
-      message: configError,
+      message: "Email service is not configured. Add GMAIL_USER and GMAIL_APP_PASS to your environment variables.",
     });
   }
 
@@ -46,13 +46,38 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    await sendContactEmail({
-      name,
-      email,
-      subject,
-      message,
-      phone,
-      service,
+    const nodemailer = await import("nodemailer");
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: gmailUser,
+        pass: gmailAppPass,
+      },
+    });
+
+    await transporter.sendMail({
+      from: gmailUser,
+      to: gmailUser,
+      replyTo: email || gmailUser,
+      subject: `New Form Submission: ${subject || "Contact Form"}`,
+      text: `Name: ${name || "N/A"}
+Email: ${email || "N/A"}
+Phone: ${phone || "N/A"}
+Service: ${service || "N/A"}
+Subject: ${subject || "N/A"}
+
+Message:
+${message || "N/A"}`,
+      html: `
+        <h2>New Form Submission</h2>
+        <p><strong>Name:</strong> ${name || "N/A"}</p>
+        <p><strong>Email:</strong> ${email || "N/A"}</p>
+        <p><strong>Phone:</strong> ${phone || "N/A"}</p>
+        <p><strong>Service:</strong> ${service || "N/A"}</p>
+        <p><strong>Subject:</strong> ${subject || "N/A"}</p>
+        <p><strong>Message:</strong></p>
+        <p>${(message || "N/A").replace(/\n/g, "<br />")}</p>
+      `,
     });
 
     return res.status(200).json({
