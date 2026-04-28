@@ -1,5 +1,3 @@
-import nodemailer from "nodemailer";
-
 export type ContactEmailPayload = {
   name?: string;
   email?: string;
@@ -40,6 +38,7 @@ export async function sendContactEmail({
     throw new Error("Missing Gmail SMTP credentials.");
   }
 
+  const nodemailer = await import("nodemailer");
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
