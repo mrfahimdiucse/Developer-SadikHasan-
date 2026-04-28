@@ -15,6 +15,9 @@ View your app in AI Studio: https://ai.studio/apps/b2b53545-d0dc-44b7-bdf2-c046b
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Create a `.env` file for email delivery:
+   `GMAIL_USER=your-gmail@gmail.com`
+   `GMAIL_APP_PASS=your-16-character-app-password`
+3. If you use Gemini features, set the `GEMINI_API_KEY` in `.env.local`
+4. Run the app:
    `npm run dev`

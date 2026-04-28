@@ -9,6 +9,8 @@ dotenv.config();
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailAppPass = process.env.GMAIL_APP_PASS?.replace(/\s+/g, "");
 
   app.use(express.json());
 
@@ -16,17 +18,25 @@ async function startServer() {
   app.post("/api/send-email", async (req, res) => {
     const { name, email, subject, message, phone, service } = req.body;
 
+    if (!gmailUser || !gmailAppPass) {
+      res.status(500).json({
+        success: false,
+        message: "Email service is not configured. Add GMAIL_USER and GMAIL_APP_PASS to your .env file.",
+      });
+      return;
+    }
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASS,
+        user: gmailUser,
+        pass: gmailAppPass,
       },
     });
 
     const mailOptions = {
-      from: process.env.GMAIL_USER,
-      to: process.env.GMAIL_USER, // Sending to yourself
+      from: gmailUser,
+      to: gmailUser,
       subject: `New Form Submission: ${subject || "Contact Form"}`,
       text: `
         Name: ${name}
