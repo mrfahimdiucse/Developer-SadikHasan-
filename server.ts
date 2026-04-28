@@ -1,16 +1,14 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { getEmailConfigErrorMessage, sendContactEmail } from "./lib/contact-email";
 
 dotenv.config();
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
-  const gmailUser = process.env.GMAIL_USER;
-  const gmailAppPass = process.env.GMAIL_APP_PASS?.replace(/\s+/g, "");
+  const PORT = Number(process.env.PORT || 3000);
 
   app.use(express.json());
 
@@ -18,40 +16,24 @@ async function startServer() {
   app.post("/api/send-email", async (req, res) => {
     const { name, email, subject, message, phone, service } = req.body;
 
-    if (!gmailUser || !gmailAppPass) {
+    const configError = getEmailConfigErrorMessage();
+    if (configError) {
       res.status(500).json({
         success: false,
-        message: "Email service is not configured. Add GMAIL_USER and GMAIL_APP_PASS to your .env file.",
+        message: configError,
       });
       return;
     }
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: gmailUser,
-        pass: gmailAppPass,
-      },
-    });
-
-    const mailOptions = {
-      from: gmailUser,
-      to: gmailUser,
-      subject: `New Form Submission: ${subject || "Contact Form"}`,
-      text: `
-        Name: ${name}
-        Email: ${email}
-        Phone: ${phone || "N/A"}
-        Service: ${service || "N/A"}
-        Subject: ${subject || "N/A"}
-        
-        Message:
-        ${message}
-      `,
-    };
-
     try {
-      await transporter.sendMail(mailOptions);
+      await sendContactEmail({
+        name,
+        email,
+        subject,
+        message,
+        phone,
+        service,
+      });
       res.status(200).json({ success: true, message: "Email sent successfully" });
     } catch (error) {
       console.error("Error sending email:", error);
